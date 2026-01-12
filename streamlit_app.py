@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import altair as alt
 
 # 페이지 설정
 st.set_page_config(
@@ -81,7 +82,18 @@ col1, col2 = st.columns([2, 1])
 with col1:
     if st.session_state.visualization_type == "히트맵":
         st.write("**히트맵 시각화:**")
-        st.write(df.style.background_gradient(cmap='YlOrRd'))
+        # Altair를 사용한 히트맵 (matplotlib 없이)
+        df_melted = df.reset_index().melt(id_vars='index', var_name='column', value_name='value')
+        df_melted = df_melted.rename(columns={'index': 'row'})
+        heatmap = alt.Chart(df_melted).mark_rect().encode(
+            x='column:N',
+            y='row:N',
+            color=alt.Color('value:Q', scale=alt.Scale(scheme='oranges'))
+        ).properties(
+            width=400,
+            height=300
+        )
+        st.altair_chart(heatmap, use_container_width=True)
     
     elif st.session_state.visualization_type == "바 차트":
         st.write("**바 차트 시각화:**")
